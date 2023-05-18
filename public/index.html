@@ -30,6 +30,7 @@
             event.preventDefault();
 
             const input = document.querySelector('.url-input');
+            // console.log(input.value);
             fetch('/urlapi', {
                 method: 'POST',
                 headers: {
@@ -39,15 +40,17 @@
                 body: JSON.stringify({
                     longUrl: input.value,
                 })
+
             })
                 .then(response => {
                     if (!response.ok) {
+                        console.log("Error in fetch")
                         throw Error(response.statusText);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log(data.shortUrl)
+                    // console.log(data.shortUrl)
 
                     result.insertAdjacentHTML('afterbegin', `
                             <div class="result">

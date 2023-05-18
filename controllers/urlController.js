@@ -1,6 +1,6 @@
-const nanoid = require('nanoid');
+// const { nanoid } = require('nanoid');
 const urlDB = require('../config/db');
-const urlModel = require('../models/urlModel');
+const Url = require('../models/urlModel');
 
 const baseUrl = `localhost:3001/urlapi/`;
 
@@ -12,18 +12,19 @@ urlDB.sync()
         console.log(err);
     })
 
-module.exports.getShortId = async (req, res, next) => {
+module.exports.postShortId = async (req, res, next) => {
     try {
         // Store the long Url
         const { longUrl } = req.body;
+        console.log(longUrl);
         // Generate a nano id for the long url
-        const shortId = nanoid(4);
+        const shortId = Math.floor(Math.random() * 10000);
         // Store both of them associately in DB
-        const shortUrl = await urlModel.create({
+        const shortUrl = await Url.create({
             longUrl,
             shortUrl: shortId
         });
-
+        // console.log("In getShortId");
         return res.status(200).json({
             'status': 'ok',
             'shortUrl': `${baseUrl}${shortId}`
@@ -35,4 +36,29 @@ module.exports.getShortId = async (req, res, next) => {
         return res.status(500).send(err);
     }
 
+}
+
+module.exports.getShortId = async (req, res, next) => {
+    try {
+        const shortid = req.params.shortUrl;
+        // fetch longUrl from database
+        // console.log(shortid);
+        const urlid = await Url.findOne({
+            where: {
+                shortUrl: shortid
+            }
+        });
+
+        // console.log(urlid);
+
+        if (!urlid) {
+            return res.status(404).send("Invalid Short URL");
+        }
+
+        res.redirect(urlid.longUrl);
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).send(err);
+    }
 }
